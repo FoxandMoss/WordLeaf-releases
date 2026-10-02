@@ -1,13 +1,5 @@
-# Writer Downloads
+# Wordleaf Releases
 
-This repository contains public release assets for Writer.
+Public Windows and macOS installers for Wordleaf.
 
-Writer source code is maintained separately in a private repository.
-
-## Downloads
-
-Visit the [latest release](https://github.com/FoxandMoss/typst-writer-releases/releases/latest).
-
-## Updating
-
-Installed Writer builds check the public release feed and can install signed updates in-app.
+The private source repository is FoxandMoss/typst-writer. Releases are produced by GitHub Actions, include the bundled Typst engine, and provide signed updater metadata for installed Wordleaf clients.
