@@ -1,0 +1,66 @@
+name: Publish stable Windows release asset
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "windows/Wordleaf_*_x64-setup.exe"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish-windows:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Select newest Windows installer
+        id: installer
+        shell: bash
+        run: |
+          set -euo pipefail
+          INSTALLER="$(find windows -maxdepth 1 -type f -name 'Wordleaf_*_x64-setup.exe' -printf '%f\n' | sort -V | tail -n 1)"
+          test -n "$INSTALLER"
+          VERSION="$(printf '%s' "$INSTALLER" | sed -E 's/^Wordleaf_([0-9]+\.[0-9]+\.[0-9]+)_x64-setup\.exe$/\1/')"
+          test "$VERSION" != "$INSTALLER"
+          FULL_PATH="windows/$INSTALLER"
+          test -s "$FULL_PATH"
+          echo "path=$FULL_PATH" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Publish stable-named asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INSTALLER: ${{ steps.installer.outputs.path }}
+          VERSION: ${{ steps.installer.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="v$VERSION"
+          if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --target main --title "Wordleaf $TAG" --notes "Wordleaf desktop $TAG for Windows."
+          fi
+
+          mkdir -p release-out
+          cp "$INSTALLER" release-out/Wordleaf-Windows-Installer.exe
+          LOCAL_SHA="$(sha256sum release-out/Wordleaf-Windows-Installer.exe | awk '{print $1}')"
+          printf '%s  %s\n' "$LOCAL_SHA" "Wordleaf-Windows-Installer.exe" > release-out/Wordleaf-Windows-Installer.exe.sha256
+
+          gh release upload "$TAG" \
+            release-out/Wordleaf-Windows-Installer.exe \
+            release-out/Wordleaf-Windows-Installer.exe.sha256 \
+            --repo "$GITHUB_REPOSITORY" --clobber
+
+          rm -rf verify
+          mkdir verify
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern "Wordleaf-Windows-Installer.exe" --dir verify
+          DOWNLOADED_SHA="$(sha256sum verify/Wordleaf-Windows-Installer.exe | awk '{print $1}')"
+          test "$DOWNLOADED_SHA" = "$LOCAL_SHA"
+
+          echo "Verified release download SHA-256: $DOWNLOADED_SHA"
+          echo "Stable URL: https://github.com/$GITHUB_REPOSITORY/releases/latest/download/Wordleaf-Windows-Installer.exe"
