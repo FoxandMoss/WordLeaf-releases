@@ -1,0 +1,9 @@
+{
+  "version": "0.2.3",
+  "platforms": {
+    "windows-x86_64": {
+      "url": "https://github.com/FoxandMoss/WordLeaf-releases/raw/main/windows/Wordleaf_0.2.3_x64-setup.exe",
+      "sha256": "056fec1dfc0198fac6bd6837e5763e2c3eb2768a00bb0fe4be3e0996cf7ef9db"
+    }
+  }
+}
