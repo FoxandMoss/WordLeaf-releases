@@ -58,7 +58,7 @@ Function DrivePage
   StrCpy $DriveSelected ""
   StrCpy $DriveCount 0
 
-  File /oname=$PLUGINSDIR\drive-options.ps1 "installer\drive-options.ps1"
+  File /oname=$PLUGINSDIR\drive-options.ps1 "drive-options.ps1"
   nsExec::ExecToStack 'powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\drive-options.ps1" -OutputPath "$DriveInfo" -CurrentInstallDir "$INSTDIR"'
   Pop $0
   Pop $1
@@ -116,7 +116,7 @@ FunctionEnd
 
 Section "Install"
   InitPluginsDir
-  File /oname=$PLUGINSDIR\cleanup-legacy.ps1 "installer\cleanup-legacy.ps1"
+  File /oname=$PLUGINSDIR\cleanup-legacy.ps1 "cleanup-legacy.ps1"
   nsExec::ExecToLog 'powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden -File "$PLUGINSDIR\cleanup-legacy.ps1" -App "Wordleaf" -KeepInstallDir "$INSTDIR"'
 
   SetOutPath "$INSTDIR"
@@ -124,7 +124,7 @@ Section "Install"
 
   CreateDirectory "$INSTDIR\.foxmoss"
   SetOutPath "$INSTDIR\.foxmoss"
-  File /oname=cleanup-legacy.ps1 "installer\cleanup-legacy.ps1"
+  File /oname=cleanup-legacy.ps1 "cleanup-legacy.ps1"
 
   SetOutPath "$INSTDIR"
   WriteUninstaller "$INSTDIR\uninstall.exe"
