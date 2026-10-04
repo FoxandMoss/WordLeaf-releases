@@ -92,7 +92,7 @@ Function DrivePage
   ${NSD_CreateLabel} 0 166u 100% 18u ""
   Pop $InstallPathLabel
   ${If} $DriveSelected != ""
-    StrCpy $INSTDIR "$DriveSelectedWordleaf"
+    StrCpy $INSTDIR "$DriveSelected\Wordleaf"
     ${NSD_SetText} $InstallPathLabel "Install location: $INSTDIR"
   ${EndIf}
 
@@ -103,7 +103,7 @@ Function DriveRadioClick
   Pop $0
   nsDialogs::GetUserData $0
   Pop $DriveSelected
-  StrCpy $INSTDIR "$DriveSelectedWordleaf"
+  StrCpy $INSTDIR "$DriveSelected\Wordleaf"
   ${NSD_SetText} $InstallPathLabel "Install location: $INSTDIR"
 FunctionEnd
 
@@ -112,7 +112,7 @@ Function DrivePageLeave
     MessageBox MB_ICONEXCLAMATION "Choose a drive for Wordleaf."
     Abort
   ${EndIf}
-  StrCpy $INSTDIR "$DriveSelectedWordleaf"
+  StrCpy $INSTDIR "$DriveSelected\Wordleaf"
 FunctionEnd
 
 Section "Install"
