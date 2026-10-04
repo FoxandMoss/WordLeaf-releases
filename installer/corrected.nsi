@@ -11,7 +11,7 @@ SetCompressor /SOLID lzma
 !endif
 
 Name "Wordleaf"
-OutFile "Wordleaf_0.2.5_x64-setup.exe"
+OutFile "Wordleaf_0.2.4.1_x64-setup.exe"
 InstallDir "$LOCALAPPDATA\Programs\Wordleaf"
 
 Var DriveDialog
@@ -130,7 +130,7 @@ Section "Install"
   WriteUninstaller "$INSTDIR\uninstall.exe"
 
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wordleaf" "DisplayName" "Wordleaf"
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wordleaf" "DisplayVersion" "0.2.5"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wordleaf" "DisplayVersion" "0.2.4.1"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wordleaf" "Publisher" "Fox & Moss"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wordleaf" "InstallLocation" "$INSTDIR"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wordleaf" "UninstallString" '"$INSTDIR\uninstall.exe"'
