@@ -44,8 +44,12 @@ jobs:
           $p = Start-Process -FilePath "$env:RUNNER_TEMP\wordleaf-old.exe" -ArgumentList @("/S", "/D=$stage") -Wait -PassThru
           if ($p.ExitCode -ne 0) { throw "Old installer staging failed: $($p.ExitCode)" }
           Get-Process wordleaf -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-          if (!(Test-Path "$stage\wordleaf.exe")) { throw "Staged Wordleaf executable not found" }
-          Remove-Item "$stage\uninstall.exe" -Force -ErrorAction SilentlyContinue
+          $main = Get-ChildItem -Path $stage -Recurse -Filter "wordleaf.exe" -File | Select-Object -First 1
+          if (-not $main) { throw "Staged Wordleaf executable not found anywhere under $stage" }
+          $payload = $main.Directory.FullName
+          "STAGE_PAYLOAD=$payload" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          Remove-Item (Join-Path $payload "uninstall.exe") -Force -ErrorAction SilentlyContinue
+          Write-Host "Using staged payload: $payload"
 
       - name: Compile radio-drive installer
         shell: powershell
@@ -53,7 +57,8 @@ jobs:
           $ErrorActionPreference = "Stop"
           $makensis = "${env:ProgramFiles(x86)}\NSIS\makensis.exe"
           if (!(Test-Path $makensis)) { $makensis = (Get-Command makensis.exe).Source }
-          & $makensis "/DSTAGEDIR=C:\wordleaf-stage" "installer\corrected.nsi"
+          if (-not $env:STAGE_PAYLOAD) { throw "STAGE_PAYLOAD was not set" }
+          & $makensis "/DSTAGEDIR=$env:STAGE_PAYLOAD" "installer\corrected.nsi"
           if ($LASTEXITCODE -ne 0) { throw "makensis failed: $LASTEXITCODE" }
           if (!(Test-Path "Wordleaf_0.2.4.1_x64-setup.exe")) { throw "Corrected installer missing" }
 
