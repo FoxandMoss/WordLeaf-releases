@@ -23,7 +23,7 @@ Var InstallPathLabel
 !define MUI_ABORTWARNING
 Page custom DrivePage DrivePageLeave
 !insertmacro MUI_PAGE_INSTFILES
-!define MUI_FINISHPAGE_RUN "$INSTDIR\wordleaf.exe"
+!define MUI_FINISHPAGE_RUN "$INSTDIR\writer.exe"
 !insertmacro MUI_PAGE_FINISH
 
 !insertmacro MUI_UNPAGE_CONFIRM
@@ -135,10 +135,10 @@ Section "Install"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wordleaf" "Publisher" "Fox & Moss"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wordleaf" "InstallLocation" "$INSTDIR"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wordleaf" "UninstallString" '"$INSTDIR\uninstall.exe"'
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wordleaf" "DisplayIcon" "$INSTDIR\wordleaf.exe"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Wordleaf" "DisplayIcon" "$INSTDIR\writer.exe"
 
   CreateDirectory "$SMPROGRAMS\Fox & Moss"
-  CreateShortcut "$SMPROGRAMS\Fox & Moss\Wordleaf.lnk" "$INSTDIR\wordleaf.exe"
+  CreateShortcut "$SMPROGRAMS\Fox & Moss\Wordleaf.lnk" "$INSTDIR\writer.exe"
 SectionEnd
 
 Section "Uninstall"
