@@ -73,3 +73,5 @@ jobs:
           "$sha  Wordleaf-Windows-Installer.exe" | Set-Content "release-out\Wordleaf-Windows-Installer.exe.sha256" -Encoding ascii
           gh release upload $tag "release-out\Wordleaf-Windows-Installer.exe" "release-out\Wordleaf-Windows-Installer.exe.sha256" --repo $env:GITHUB_REPOSITORY --clobber
           Write-Host "Published SHA256 $sha"
+
+# Rebuild after NSIS resource-path correction
