@@ -1,6 +1,7 @@
 Unicode true
 RequestExecutionLevel user
 SetCompressor zlib
+ShowInstDetails show
 
 !include "MUI2.nsh"
 !include "nsDialogs.nsh"
@@ -9,6 +10,8 @@ SetCompressor zlib
 !ifndef STAGEDIR
   !error "STAGEDIR is required"
 !endif
+
+!define CURRENT_APP_VERSION "0.2.4"
 
 Name "Wordleaf"
 OutFile "Wordleaf-Windows-Installer.exe"
@@ -35,6 +38,10 @@ Page custom DrivePage DrivePageLeave
   ReadINIStr $0 "$DriveInfo" "Drive${INDEX}" "Root"
   ${If} $0 != ""
     ReadINIStr $1 "$DriveInfo" "Drive${INDEX}" "Display"
+    ReadINIStr $4 "$DriveInfo" "Drive${INDEX}" "Recommended"
+    ${If} $4 == "1"
+      StrCpy $1 "$1  -  Recommended"
+    ${EndIf}
     ${NSD_CreateRadioButton} 0 ${Y} 100% 12u "$1"
     Pop $2
     nsDialogs::SetUserData $2 "$0"
@@ -70,7 +77,7 @@ Function DrivePage
   ${EndIf}
 
   !insertmacro MUI_HEADER_TEXT "Choose a drive" "Wordleaf will install on the drive you select."
-  ${NSD_CreateLabel} 0 0 100% 24u "Choose one local writable drive. Cloud, optical, and read-only targets are excluded automatically."
+  ${NSD_CreateLabel} 0 0 100% 24u "Choose one local writable drive. The option marked Recommended is chosen from this computer's detected storage hardware (NVMe/SSD/HDD/removable) and available space. Cloud, optical, virtual, and read-only targets are excluded."
   Pop $4
 
   !insertmacro DRIVE_OPTION 1 30u
@@ -116,6 +123,22 @@ Function DrivePageLeave
 FunctionEnd
 
 Section "Install"
+  InitPluginsDir
+  File /oname=$PLUGINSDIR\check-latest-installer.ps1 "check-latest-installer.ps1"
+  DetailPrint "Checking for the newest Wordleaf release..."
+  nsExec::ExecToLog /TIMEOUT=900000 'powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden -File "$PLUGINSDIR\check-latest-installer.ps1" -CurrentVersion "${CURRENT_APP_VERSION}" -ReleaseRepo "FoxandMoss/WordLeaf-releases" -StableAssetName "Wordleaf-Windows-Installer.exe" -AppName "Wordleaf"'
+  Pop $0
+  ${If} $0 == "timeout"
+    MessageBox MB_ICONSTOP "Wordleaf could not finish checking the newest release. Nothing has been installed yet."
+    Abort
+  ${ElseIf} $0 == 10
+    DetailPrint "A newer Wordleaf installer was opened. Closing this older installer."
+    Quit
+  ${ElseIf} $0 == 20
+    MessageBox MB_ICONSTOP "A newer Wordleaf release exists, but it could not be downloaded and verified safely. Nothing has been installed."
+    Abort
+  ${EndIf}
+
   InitPluginsDir
   File /oname=$PLUGINSDIR\cleanup-legacy.ps1 "cleanup-legacy.ps1"
   nsExec::ExecToLog 'powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden -File "$PLUGINSDIR\cleanup-legacy.ps1" -App "Wordleaf" -KeepInstallDir "$INSTDIR"'
