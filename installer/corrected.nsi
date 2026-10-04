@@ -37,7 +37,7 @@ Page custom DrivePage DrivePageLeave
     ReadINIStr $1 "$DriveInfo" "Drive${INDEX}" "Display"
     ${NSD_CreateRadioButton} 0 ${Y} 100% 12u "$1"
     Pop $2
-    ${NSD_SetUserData} $2 "$0"
+    nsDialogs::SetUserData $2 "$0"
     ${NSD_OnClick} $2 DriveRadioClick
     ReadINIStr $3 "$DriveInfo" "Drive${INDEX}" "Default"
     ${If} $DriveCount == 0
@@ -101,7 +101,8 @@ FunctionEnd
 
 Function DriveRadioClick
   Pop $0
-  ${NSD_GetUserData} $0 $DriveSelected
+  nsDialogs::GetUserData $0
+  Pop $DriveSelected
   StrCpy $INSTDIR "$DriveSelectedWordleaf"
   ${NSD_SetText} $InstallPathLabel "Install location: $INSTDIR"
 FunctionEnd
