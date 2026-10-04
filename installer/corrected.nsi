@@ -11,7 +11,7 @@ SetCompressor zlib
 !endif
 
 Name "Wordleaf"
-OutFile "Wordleaf_0.2.4.1_x64-setup.exe"
+OutFile "Wordleaf-Windows-Installer.exe"
 InstallDir "$LOCALAPPDATA\Programs\Wordleaf"
 
 Var DriveDialog
