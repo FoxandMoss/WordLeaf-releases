@@ -88,6 +88,9 @@ jobs:
           if ($LASTEXITCODE -ne 0) {
             gh release create $tag --repo $env:GITHUB_REPOSITORY --target main --title "Wordleaf v0.2.4 installer fix 1" --notes "Wordleaf v0.2.4 payload with corrected drive-radio installer and retroactive cleanup for stale Wordleaf registrations."
           }
+          gh release edit $tag --repo $env:GITHUB_REPOSITORY --latest
+          if ($LASTEXITCODE -ne 0) { throw "Could not mark corrected Wordleaf release as latest" }
+
           New-Item -ItemType Directory -Force release-out | Out-Null
           Copy-Item "installer\Wordleaf-Windows-Installer.exe" "release-out\Wordleaf-Windows-Installer.exe"
           $sha=(Get-FileHash "release-out\Wordleaf-Windows-Installer.exe" -Algorithm SHA256).Hash.ToLower()
