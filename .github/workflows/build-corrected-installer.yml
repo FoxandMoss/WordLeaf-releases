@@ -1,0 +1,70 @@
+name: Build corrected Wordleaf installer
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "installer/**"
+      - ".github/workflows/build-corrected-installer.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install NSIS
+        shell: powershell
+        run: |
+          choco install nsis --no-progress -y
+
+      - name: Download current public Wordleaf payload
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $url = "https://github.com/FoxandMoss/WordLeaf-releases/releases/download/v0.2.4/Wordleaf-Windows-Installer.exe"
+          Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile "$env:RUNNER_TEMP\wordleaf-old.exe"
+
+      - name: Stage current Wordleaf files
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $stage = "C:\wordleaf-stage"
+          Remove-Item $stage -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          $p = Start-Process -FilePath "$env:RUNNER_TEMP\wordleaf-old.exe" -ArgumentList @("/S", "/D=$stage") -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "Old installer staging failed: $($p.ExitCode)" }
+          Get-Process wordleaf -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+          if (!(Test-Path "$stage\wordleaf.exe")) { throw "Staged Wordleaf executable not found" }
+          Remove-Item "$stage\uninstall.exe" -Force -ErrorAction SilentlyContinue
+
+      - name: Compile radio-drive installer
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $makensis = "${env:ProgramFiles(x86)}\NSIS\makensis.exe"
+          if (!(Test-Path $makensis)) { $makensis = (Get-Command makensis.exe).Source }
+          & $makensis "/DSTAGEDIR=C:\wordleaf-stage" "installer\corrected.nsi"
+          if ($LASTEXITCODE -ne 0) { throw "makensis failed: $LASTEXITCODE" }
+          if (!(Test-Path "Wordleaf_0.2.4.1_x64-setup.exe")) { throw "Corrected installer missing" }
+
+      - name: Publish installer revision
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $tag = "v0.2.4-installerfix1"
+          if (-not (gh release view $tag --repo $env:GITHUB_REPOSITORY 2>$null)) {
+            gh release create $tag --repo $env:GITHUB_REPOSITORY --target main --title "Wordleaf v0.2.4 installer fix 1" --notes "Wordleaf v0.2.4 payload with corrected drive-radio installer and retroactive cleanup for stale Wordleaf registrations."
+          }
+          New-Item -ItemType Directory -Force release-out | Out-Null
+          Copy-Item "Wordleaf_0.2.4.1_x64-setup.exe" "release-out\Wordleaf-Windows-Installer.exe"
+          $sha=(Get-FileHash "release-out\Wordleaf-Windows-Installer.exe" -Algorithm SHA256).Hash.ToLower()
+          "$sha  Wordleaf-Windows-Installer.exe" | Set-Content "release-out\Wordleaf-Windows-Installer.exe.sha256" -Encoding ascii
+          gh release upload $tag "release-out\Wordleaf-Windows-Installer.exe" "release-out\Wordleaf-Windows-Installer.exe.sha256" --repo $env:GITHUB_REPOSITORY --clobber
+          Write-Host "Published SHA256 $sha"
