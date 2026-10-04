@@ -52,13 +52,13 @@ jobs:
           & $seven x "$env:RUNNER_TEMP\wordleaf-old.exe" "-o$stage" -y | Out-Host
           if ($LASTEXITCODE -ne 0) { throw "Could not extract the current Wordleaf payload: $LASTEXITCODE" }
 
-          $main = Get-ChildItem -Path $stage -Recurse -Filter "wordleaf.exe" -File -ErrorAction SilentlyContinue |
+          $main = Get-ChildItem -Path $stage -Recurse -Filter "writer.exe" -File -ErrorAction SilentlyContinue |
             Sort-Object { $_.FullName.Length } |
             Select-Object -First 1
           if (-not $main) { throw "Extracted Wordleaf payload did not contain wordleaf.exe" }
 
           $payload = $main.Directory.FullName
-          if (!(Test-Path (Join-Path $payload "wordleaf.exe"))) {
+          if (!(Test-Path (Join-Path $payload "writer.exe"))) {
             throw "Wordleaf executable missing from extracted payload: $payload"
           }
 
