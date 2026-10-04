@@ -75,3 +75,5 @@ jobs:
           Write-Host "Published SHA256 $sha"
 
 # Rebuild after NSIS resource-path correction
+
+# Rebuild after exact NSIS path fix
