@@ -84,8 +84,9 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
           $tag = "v0.2.4-installerfix1"
-          gh release view $tag --repo $env:GITHUB_REPOSITORY *> $null
-          if ($LASTEXITCODE -ne 0) {
+          cmd.exe /d /c "gh release view $tag --repo $env:GITHUB_REPOSITORY >nul 2>&1"
+          $releaseExists = ($LASTEXITCODE -eq 0)
+          if (-not $releaseExists) {
             gh release create $tag --repo $env:GITHUB_REPOSITORY --target main --title "Wordleaf v0.2.4 installer fix 1" --notes "Wordleaf v0.2.4 payload with corrected drive-radio installer and retroactive cleanup for stale Wordleaf registrations."
           }
           gh release edit $tag --repo $env:GITHUB_REPOSITORY --latest
