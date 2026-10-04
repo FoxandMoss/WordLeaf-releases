@@ -1,6 +1,6 @@
 Unicode true
 RequestExecutionLevel user
-SetCompressor /SOLID lzma
+SetCompressor zlib
 
 !include "MUI2.nsh"
 !include "nsDialogs.nsh"
